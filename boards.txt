@@ -1,0 +1,20 @@
+menu.UploadSpeed=Upload Speed
+menu.CpuFrequency=CPU Frequency
+menu.FlashMode=Flash Mode
+menu.FlashFreq=Flash Frequency
+
+##############################################################
+generic.name=Linux Program
+
+generic.upload.tool=asynclauncher
+generic.upload.speed=115200
+generic.upload.resetmethod=ck
+generic.upload.maximum_size=434160
+generic.upload.maximum_data_size=81920
+generic.upload.wait_for_upload_port=true
+generic.serial.disableDTR=true
+generic.serial.disableRTS=true
+
+generic.build.board=LinuxUserspace
+generic.build.core=linduino
+generic.build.variant=generic

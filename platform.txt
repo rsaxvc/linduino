@@ -1,0 +1,99 @@
+# For more info:
+# https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5---3rd-party-Hardware-specification
+
+name=RPiDuino Kernel Module
+version=0.0.1
+
+runtime.tools.asynclauncher.path={runtime.platform.path}/tools/asynclauncher
+
+compiler.warning_flags=-w
+compiler.warning_flags.none=-w
+compiler.warning_flags.default=
+compiler.warning_flags.more=-Wall
+compiler.warning_flags.all=-Wall -Wextra -Wundef
+
+compiler.debug=-g
+compiler.optimize=-O1
+compiler.inc=
+
+compiler.fpu=
+compiler.cpu=-march=native
+compiler.common={compiler.warning_flags} {compiler.cpu} {compiler.optimize} {compiler.debug} {compiler.inc}
+
+compiler.path=/usr/bin/
+compiler.cpreprocessor.flags="-I{build.path}/core"
+
+compiler.c.cmd=gcc
+compiler.c.flags=-c {compiler.debug} {compiler.common} -Wl,-EL -nostartfiles -MMD -std=gnu99
+
+compiler.S.cmd=gcc
+compiler.S.flags=-c {compiler.debug} -x assembler-with-cpp -MMD
+
+compiler.c.elf.flags={compiler.debug} {compiler.common} -nostartfiles -Wl,--no-check-sections -u call_user_start -Wl,--gc-sections
+
+compiler.c.elf.cmd=g++
+compiler.c.elf.libs=-lm
+#compiler.c.elf.libs=-lm -lgcc -lstdc++
+
+compiler.cpp.cmd=g++
+compiler.cpp.flags=-c {compiler.common} -g -fno-rtti -std=c++11 -MMD
+
+compiler.as.cmd=as
+
+compiler.ar.cmd=ar
+compiler.ar.flags=cr
+
+compiler.elf2hex.cmd=
+compiler.elf2hex.flags=
+
+compiler.size.cmd=size
+
+compiler.asynclauncher.cmd=asynclauncher
+
+# ------------------------------
+
+tools.asynclauncher.cmd=asynclauncher.sh
+tools.asynclauncher.path={runtime.platform.path}/tools/asynclauncher
+
+tools.asynclauncher.upload.protocol=esp
+tools.asynclauncher.upload.params.verbose=-vv
+tools.asynclauncher.upload.params.quiet=
+tools.asynclauncher.upload.pattern="{path}/{cmd}" "{build.path}/{build.project_name}.elf"
+
+# This can be overriden in boards.txt
+build.extra_flags=
+
+# These can be overridden in platform.local.txt
+compiler.c.extra_flags=
+compiler.c.elf.extra_flags=
+compiler.S.extra_flags=
+compiler.cpp.extra_flags=
+compiler.ar.extra_flags=
+compiler.elf2hex.extra_flags=
+
+## generate file with git version number
+## needs bash, git, and echo
+
+## windows-compatible version may be added later
+
+
+## Compile c files
+recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.cpreprocessor.flags} {compiler.c.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_BOARD="{build.board}" {compiler.c.extra_flags} {build.extra_flags} {includes} "{source_file}" -o "{object_file}"
+
+## Compile c++ files
+recipe.cpp.o.pattern="{compiler.path}{compiler.cpp.cmd}" {compiler.cpreprocessor.flags} {compiler.cpp.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_BOARD="{build.board}" {compiler.cpp.extra_flags} {build.extra_flags} {includes} "{source_file}" -o "{object_file}"
+
+## Compile S files
+recipe.S.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.cpreprocessor.flags} {compiler.S.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_BOARD="{build.board}" {compiler.c.extra_flags} {build.extra_flags} {includes} "{source_file}" -o "{object_file}"
+
+## Create archives
+recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{build.path}/arduino.ar" "{object_file}"
+
+## Combine gc-sections, archives, and objects
+recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} -o "{build.path}/{build.project_name}.elf" -Wl,--start-group {object_files} "{build.path}/arduino.ar" {compiler.c.elf.libs} -Wl,--end-group  "-L{build.path}"
+
+## Compute size
+recipe.size.pattern="{compiler.path}{compiler.size.cmd}" -A "{build.path}/{build.project_name}.elf"
+recipe.size.regex=^(?:\.irom0\.text|\.text|\.data|\.rodata|)\s+([0-9]+).*
+recipe.size.regex.data=^(?:\.data|\.rodata|\.bss)\s+([0-9]+).*
+
