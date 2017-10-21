@@ -1,6 +1,8 @@
 /* 
- core_esp8266_wiring.c - implementation of Wiring API for esp8266
+ core_linduino_wiring.c - implementation of Wiring API for esp8266
 
+ Copyright (c) 2017 Richard Allen. All rights reserved.
+ This file is part of the linduino core for Arduino environment.
  Copyright (c) 2014 Ivan Grokhotkov. All rights reserved.
  This file is part of the esp8266 core for Arduino environment.
  
@@ -21,11 +23,7 @@
 
 #include "wiring_private.h"
 
-#define ONCE 0
-#define REPEAT 1
-
-void delay_end(void* arg) {
-}
+static struct timeval tv_start;
 
 #include <unistd.h>
 void delay(unsigned long ms) {
@@ -37,13 +35,21 @@ void delay(unsigned long ms) {
 unsigned long millis() {
     struct timeval tv;
     gettimeofday(&tv,NULL);
-    return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+
+    if( tv_start.tv_sec == 0 && tv_start.tv_usec == 0 )
+        tv_start = tv;
+
+    return (tv.tv_sec-tv_start.tv_sec) * 1000 + (tv.tv_usec-tv_start.tv_usec) / 1000;
 }
 
 unsigned long micros() {
     struct timeval tv;
     gettimeofday(&tv,NULL);
-    return tv.tv_sec * 1000000 + tv.tv_usec;
+
+    if( tv_start.tv_sec == 0 && tv_start.tv_usec == 0 )
+        tv_start = tv;
+
+    return (tv.tv_sec-tv_start.tv_sec) * 1000000 + tv.tv_usec - tv_start.tv_usec;
 }
 
 #include <unistd.h>
