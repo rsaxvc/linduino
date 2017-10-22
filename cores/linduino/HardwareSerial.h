@@ -28,41 +28,8 @@
 #define HardwareSerial_h
 
 #include <inttypes.h>
+#include <termios.h>
 #include "Stream.h"
-#include "uart.h"
-
-enum SerialConfig {
-    SERIAL_5N1 = UART_5N1,
-    SERIAL_6N1 = UART_6N1,
-    SERIAL_7N1 = UART_7N1,
-    SERIAL_8N1 = UART_8N1,
-    SERIAL_5N2 = UART_5N2,
-    SERIAL_6N2 = UART_6N2,
-    SERIAL_7N2 = UART_7N2,
-    SERIAL_8N2 = UART_8N2,
-    SERIAL_5E1 = UART_5E1,
-    SERIAL_6E1 = UART_6E1,
-    SERIAL_7E1 = UART_7E1,
-    SERIAL_8E1 = UART_8E1,
-    SERIAL_5E2 = UART_5E2,
-    SERIAL_6E2 = UART_6E2,
-    SERIAL_7E2 = UART_7E2,
-    SERIAL_8E2 = UART_8E2,
-    SERIAL_5O1 = UART_5O1,
-    SERIAL_6O1 = UART_6O1,
-    SERIAL_7O1 = UART_7O1,
-    SERIAL_8O1 = UART_8O1,
-    SERIAL_5O2 = UART_5O2,
-    SERIAL_6O2 = UART_6O2,
-    SERIAL_7O2 = UART_7O2,
-    SERIAL_8O2 = UART_8O2,
-};
-
-enum SerialMode {
-    SERIAL_FULL = UART_FULL,
-    SERIAL_RX_ONLY = UART_RX_ONLY,
-    SERIAL_TX_ONLY = UART_TX_ONLY
-};
 
 class HardwareSerial: public Stream
 {
@@ -70,21 +37,7 @@ public:
     HardwareSerial();
     virtual ~HardwareSerial() {}
 
-    void begin(unsigned long baud)
-    {
-        begin(baud, SERIAL_8N1, SERIAL_FULL, 1);
-    }
-    void begin(unsigned long baud, SerialConfig config)
-    {
-        begin(baud, config, SERIAL_FULL, 1);
-    }
-    void begin(unsigned long baud, SerialConfig config, SerialMode mode)
-    {
-        begin(baud, config, mode, 1);
-    }
-
-    void begin(unsigned long baud, SerialConfig config, SerialMode mode, uint8_t tx_pin);
-
+    void begin();
     void end();
 
     int available(void) override;
@@ -118,6 +71,7 @@ public:
 
 protected:
     int _peek_char = -1;
+    struct termios old_tio;
 };
 
 extern HardwareSerial Serial;

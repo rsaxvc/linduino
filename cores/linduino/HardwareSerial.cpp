@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
+#include <unistd.h>
+#include <termios.h>
 #include "Arduino.h"
 #include "HardwareSerial.h"
 
@@ -34,34 +36,50 @@
 HardwareSerial::HardwareSerial()
 {}
 
-void HardwareSerial::begin(unsigned long baud, SerialConfig config, SerialMode mode, uint8_t tx_pin)
+void HardwareSerial::begin()
 {
     _peek_char = -1;
+
+    struct termios new_tio;
+
+    /* get the terminal settings for stdin */
+    tcgetattr(STDIN_FILENO,&old_tio);
+
+    /* we want to keep the old setting to restore them a the end */
+    new_tio=old_tio;
+
+    /* disable canonical mode (buffered i/o) and local echo */
+    cfmakeraw( &new_tio );
+
+    /* set the new settings immediately */
+    tcsetattr(STDIN_FILENO,TCSANOW,&new_tio);
 }
 
 void HardwareSerial::end()
 {
+    /* restore the former settings */
+    tcsetattr( STDIN_FILENO, TCSANOW, &old_tio );
 }
 
 bool HardwareSerial::isTxEnabled(void)
 {
-    return uart_tx_enabled(NULL);
+    return 1;
 }
 
 bool HardwareSerial::isRxEnabled(void)
 {
-    return uart_rx_enabled(NULL);
+    return 1;
 }
 
 int HardwareSerial::available(void)
 {
-    return uart_rx_enabled(NULL);
+    return 1;
 }
 
 int HardwareSerial::peek(void)
 {
     // this may return -1, but that's okay
-    return uart_read_char(NULL);
+    return getchar();
 }
 
 int HardwareSerial::read(void)
@@ -71,41 +89,22 @@ int HardwareSerial::read(void)
         _peek_char = -1;
         return tmp;
     }
-    return uart_read_char(NULL);
+    return getchar();
 }
 
 int HardwareSerial::availableForWrite(void)
 {
-    if(!uart_tx_enabled(NULL)) {
-        return 0;
-    }
-
-    return static_cast<int>(uart_tx_free(NULL));
+    return 1;
 }
 
 void HardwareSerial::flush()
 {
-    if(!uart_tx_enabled(NULL)) {
-        return;
-    }
-
-    uart_wait_tx_empty(NULL);
 }
 
 size_t HardwareSerial::write(uint8_t c)
 {
-    if(!uart_tx_enabled(NULL)) {
-        return 0;
-    }
-
-    uart_write_char(NULL, c);
+    putchar(c);
     return 1;
 }
-
-HardwareSerial::operator bool() const
-{
-    return 1;
-}
-
 
 HardwareSerial Serial;
