@@ -15,7 +15,7 @@ It lets you write sketches using familiar Arduino functions and libraries, and r
 
 ### Installing with Boards Manager ###
 
-Starting with 1.6.4, Arduino allows installation of third-party platform packages using Boards Manager. We have packages available for Windows, Mac OS, and Linux (32 and 64 bit).
+Starting with 1.6.4, Arduino allows installation of third-party platform packages using Boards Manager. We have packages available for Linux only.
 
 - Install Arduino 1.6.8 from the [Arduino website](http://www.arduino.cc/en/main/software).
 - Start Arduino and open Preferences window.
